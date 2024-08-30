@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Userss</title>
+</head>
+<body>
+    <h1>Users </h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User-Name</th>
+                
+            </tr>
+        </thead>
+        <tbody id="table">
+            <tr>
+
+            </tr>
+        </tbody>
+
+       
+    </table>
+    <button><a href="/addusers">Add User</a></button>
+    <button><a href="/showbooks">Show Books</a></button>
+    <form id = "deleteallform" method="DELETE">
+        <button type="submit">DELETEALL</button>
+    </form>
+    <script>
+        let table = document.getElementById("table");
+        let delall = document.getElementById("deleteallform");
+        delall.onsubmit = async function(event) {
+            event.preventDefault();
+            response =
+                await fetch("/deleteall" ,{
+
+                    method : 'DELETE',
+                }
+
+                )
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.message); // Display success message
+                } else {
+                    const error = await response.json();
+            
+        }window.location.reload();
+    }
+        const data = async () =>{
+           let data2 = await fetch("http://127.0.0.1:5000/showusers")
+           let data3 = await data2.json()
+           return data3
+
+        } 
+        const displaydata = async () =>{
+            let booklist = await data()
+            
+            for (const element of booklist) {
+                
+                newdata = `<tr><td class = "ids">${element["id"]}</td><td>${element["name"]}</td><td><button onclick="deletefunction(event)" class="delbtn" data-target=${element['id']}>Delete</button></td><td><a href="/edituser/${element['id']}" data-target=${element['id']}>Edit</a></td><tr>`
+                table.innerHTML += newdata
+            }
+        }
+        displaydata()
+        const deletefunction = async (event) =>{
+            event.preventDefault();
+            response = await fetch(`/deleteuser/${(event.target.dataset.target)}`,{
+                
+                method : 'DELETE',
+                
+                }
+
+                )
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.message); 
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.message}`);
+            
+        }
+window.location.reload();
+
+        
+}
+
+    </script> 
+</body>
+</html>

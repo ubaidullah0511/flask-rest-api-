@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+</head>
+
+<body>
+    <h1>Edit User</h1>
+    <form id="editform">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+
+        <input type="submit" value="Edit User">
+    </form>
+    <button><a href="/showusersform">Show Users</a></button>
+</body>
+<script>
+    window.onload = async () => {
+        var url = window.location.href;
+        var id = url.split("/").slice(-1)[0];
+        let editform = document.getElementById('editform')
+        editform.onsubmit = async function (event) {
+            event.preventDefault();
+            const formData = new FormData(editform)
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value; // Populate the data object with key-value pairs
+            });
+            const response =
+                await fetch(`/edituser/${id}`, {
+
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json' // Set the content type to JSON
+                    },
+                    body: JSON.stringify(data)
+                }
+
+                )
+            console.log(JSON.stringify(data))
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message); // Display success message
+                window.location.href = 'http://127.0.0.1:5000/showusersform';
+            } const error = await response.json();
+            alert(`Error: ${error.message}`); // Display error message
+        
+
+    }
+
+    let getname = async () => {
+
+        let response = await fetch(`/user/${id}`)
+        let username = await response.json()
+        let name = await username[1]
+        document.getElementById("name").value = name
+    }
+    getname()
+
+    }
+</script>
+
+</html>

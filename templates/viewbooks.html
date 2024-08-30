@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Books</title>
+</head>
+
+<body>
+    <h1>Books In Catalogue</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Book-Name</th>
+                <th>Author</th>
+                <th>Assigned to </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="table">
+            <tr>
+
+            </tr>
+        </tbody>
+
+    </table>
+    <button><a href="/addbookincatalogue">Add Book</a></button>
+    <button><a href="/showusersform">Show Users</a></button>
+
+    <script>
+        let table = document.getElementById("table");
+
+        const data = async () => {
+            let data2 = await fetch("http://127.0.0.1:5000/showbooksincatalogue")
+            let data3 = await data2.json()
+            return data3
+
+        }
+        const userdata = async () => {
+            let data2 = await fetch("http://127.0.0.1:5000/showusers")
+            let data3 = await data2.json()
+            return data3
+
+        }
+        const issueabook = async () => {
+                dropdown = document.getElementsByClassName("dropdown")
+                Array.from(dropdown).forEach(element => {
+                    
+                element.addEventListener("change", async () => {
+                    const selectedValue = element.value;
+                    const book_id = element.dataset.target;
+                    let response = await fetch(`/issuebooktouser/${selectedValue}/${book_id}`, {
+
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json' // Set the content type to JSON
+                        },
+
+                    })
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(result.message); // Display success message
+                        window.location.reload();
+                    } const error = await response.json();
+                    alert(`Error: ${error.message}`); // Display error message
+
+
+
+                })
+            
+            });
+        }
+        const displaydata = async () => {
+            let booklist = await data()
+            let userlist = await userdata()
+
+            for (const element of booklist) {
+                let user = ""
+                for (const element of userlist) {
+                    user += `<option value=${element["id"]}>${element["name"]}</option>`
+                }
+
+
+
+
+                newdata = `<tr><td>${element["id"]}</td><td>${element["bookname"]}</td><td>${element["authorname"]}</td><td>${element["user"] ? element["user"] : "Not Assigned"}<td><button onclick="deletefunction(event)" class="delbtn" data-target=${element['id']}>Delete</button></td><td>
+                    <label for="dropdown">Issue a book:</label>
+    <select class="dropdown" name="users" data-target = ${element['id']}>
+        <option value="">--Select a User--</option>
+        ${user}
+    </select>
+                    </td><td><button onclick="returnfunction(event)"  data-target=${element['id']}>Return</button></td></tr>`
+                table.innerHTML += newdata
+            }
+            await issueabook()
+        }
+        displaydata()
+        const deletefunction = async (event) => {
+            event.preventDefault();
+            response = await fetch(`/deletebook/${(event.target.dataset.target)}`, {
+
+                method: 'DELETE',
+            }
+
+            )
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.message}`);
+
+            }
+            
+            
+        }
+        const returnfunction = async (event) => {
+            event.preventDefault();
+            response = await fetch(`/returnbookfromuser/${(event.target.dataset.target)}`, {
+
+                method: 'PUT',
+            }
+
+            )
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.message}`);
+
+            }window.location.reload();
+            
+            
+        }
+
+    </script>
+</body>
+
+</html>
